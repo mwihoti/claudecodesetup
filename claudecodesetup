@@ -1,45 +1,20 @@
-# 🚀 Claude Code for Free — Using OpenRouter
+# Claude Code for free — using OpenRouter
 
-> Use the full power of Claude Code with **zero subscription cost** by routing through OpenRouter's free model tier.
+I cancelled my Claude subscription last week. Still using Claude Code every day.
 
----
+Turns out Claude Code lets you swap the API endpoint. Point it at OpenRouter, which has a free tier with genuinely capable models, and you're done. Same CLI, same workflow, zero cost.
 
-## Table of Contents
-
-- [What is this?](#what-is-this)
-- [Prerequisites](#prerequisites)
-- [Step 1 — Install Claude Code](#step-1--install-claude-code)
-- [Step 2 — Get a Free OpenRouter API Key](#step-2--get-a-free-openrouter-api-key)
-- [Step 3 — Configure Claude Code](#step-3--configure-claude-code)
-- [Step 4 — Verify It Works](#step-4--verify-it-works)
-- [Free Models You Can Use](#free-models-you-can-use)
-- [Switching Models](#switching-models)
-- [Understanding Free Tier Limits](#understanding-free-tier-limits)
-- [Tips to Stretch Your Free Tokens](#tips-to-stretch-your-free-tokens)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
+This is the guide I wish existed when I was figuring it out. Took me an embarrassing amount of trial and error.
 
 ---
 
-## What is this?
+## What you need before starting
 
-Claude Code is Anthropic's official agentic coding CLI — it reads your codebase, writes and edits files, runs commands, and reasons through complex tasks. Normally it requires an Anthropic subscription or API credits.
+- Linux, macOS, or Windows with WSL
+- Node.js v18 or higher — check with `node --version`
+- A terminal
 
-This guide shows you how to point Claude Code at **OpenRouter** instead, which provides access to powerful open-source models (Llama, DeepSeek, Qwen, Nemotron, and more) **completely free of charge**.
-
----
-
-## Prerequisites
-
-- A computer running **Linux, macOS, or Windows (WSL)**
-- **Node.js v18+** installed ([download here](https://nodejs.org))
-- A terminal / command line
-
-Check your Node version:
-```bash
-node --version
-# Should output v18.x.x or higher
-```
+That's it.
 
 ---
 
@@ -49,48 +24,42 @@ node --version
 npm install -g @anthropic-ai/claude-code
 ```
 
-Verify the installation:
+Check it installed:
 ```bash
 claude --version
 ```
 
-You should see output like `Claude Code v2.x.x`.
-
-> **Note:** If you get a permissions error on Linux/macOS, try:
-> ```bash
-> sudo npm install -g @anthropic-ai/claude-code
-> ```
-> Or configure npm to use a user-level prefix to avoid needing sudo.
+If you hit a permissions error on Linux or macOS:
+```bash
+sudo npm install -g @anthropic-ai/claude-code
+```
 
 ---
 
-## Step 2 — Get a Free OpenRouter API Key
+## Step 2 — Get your free OpenRouter key
 
-1. Go to [openrouter.ai](https://openrouter.ai) and sign up (free, no credit card required)
-2. Navigate to **Keys** in your account dashboard
-3. Click **Create Key**
-4. Copy the key — it starts with `sk-or-v1-...`
+Go to [openrouter.ai](https://openrouter.ai), sign up, and create an API key under your account dashboard. No credit card. The key starts with `sk-or-v1-...`.
 
-Keep this key safe. You'll use it in the next step.
+Keep it somewhere — you'll need it in the next step.
 
 ---
 
 ## Step 3 — Configure Claude Code
 
-Claude Code reads its configuration from `~/.claude/settings.json`. Create or edit this file:
+This is the part that tripped me up. Claude Code has a config file at `~/.claude/settings.json`. Create it if it doesn't exist:
 
 ```bash
 mkdir -p ~/.claude
 nano ~/.claude/settings.json
 ```
 
-Paste the following (replace `YOUR_OPENROUTER_KEY` with your actual key):
+Paste this in (swap `your-key-here` for your actual OpenRouter key):
 
 ```json
 {
   "env": {
     "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
-    "ANTHROPIC_AUTH_TOKEN": "YOUR_OPENROUTER_KEY",
+    "ANTHROPIC_AUTH_TOKEN": "your-key-here",
     "ANTHROPIC_API_KEY": "",
     "ANTHROPIC_MODEL": "meta-llama/llama-3.3-70b-instruct:free"
   },
@@ -98,105 +67,83 @@ Paste the following (replace `YOUR_OPENROUTER_KEY` with your actual key):
 }
 ```
 
-Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X` in nano).
+Save and close (`Ctrl+O`, Enter, `Ctrl+X` in nano).
 
-### Why these settings?
+**Why each line matters:**
 
-| Setting | Why it's needed |
-|---|---|
-| `ANTHROPIC_BASE_URL` | Points Claude Code to OpenRouter instead of Anthropic |
-| `ANTHROPIC_AUTH_TOKEN` | Your OpenRouter key (Claude Code reads auth from this var) |
-| `ANTHROPIC_API_KEY` | Set to empty string to prevent fallback to Anthropic servers |
-| `ANTHROPIC_MODEL` | The free model to use (see full list below) |
+- `ANTHROPIC_BASE_URL` — points Claude Code at OpenRouter instead of Anthropic
+- `ANTHROPIC_AUTH_TOKEN` — your OpenRouter key goes here, not in API_KEY
+- `ANTHROPIC_API_KEY` — leave this empty or Claude Code tries to fall back to Anthropic
+- `ANTHROPIC_MODEL` — the free model to use
 
-> ⚠️ **Important:** Use `https://openrouter.ai/api` — NOT `https://openrouter.ai/api/v1`. The `/v1` suffix causes empty response errors.
+> One thing that got me: the URL must be `https://openrouter.ai/api` — no `/v1` at the end. With `/v1` you get a silent empty response that's genuinely hard to debug.
 
 ---
 
-## Step 4 — Verify It Works
-
-Reload your shell and launch Claude Code:
+## Step 4 — Test it
 
 ```bash
 exec bash
 claude
 ```
 
-You should see the Claude Code welcome screen with your model name in the bottom left. Type `hi` and press Enter — if you get a response, you're all set!
+You should see the Claude Code welcome screen with the model name in the bottom left corner. Type `hi` — if it responds, you're good to go.
 
 ---
 
-## Free Models You Can Use
+## Free models worth using
 
-These are actively maintained free models on OpenRouter as of 2026. Swap them in your `ANTHROPIC_MODEL` setting:
+Start with Llama 3.3 — it follows Claude Code's tool-use format the most reliably. The others are good but occasionally quirky.
 
-| Model ID | Strengths | Context |
+| Model ID | Good for | Context |
 |---|---|---|
-| `meta-llama/llama-3.3-70b-instruct:free` | Best all-round, most reliable for tool use | 128K |
-| `nvidia/nemotron-3-super-120b-a12b:free` | Strong reasoning, very long context | 1M |
-| `openai/gpt-oss-120b:free` | Strong coding, OpenAI open weights | 128K |
-| `minimax/minimax-m2.5:free` | Good at coding and agentic tasks | 1M |
-| `google/gemma-3-27b-it:free` | Lightweight, fast, reliable | 128K |
-| `deepseek/deepseek-r1:free` | Excellent reasoning and code | 64K |
-| `mistralai/mistral-small-3.1-24b-instruct:free` | Fast, efficient for smaller tasks | 128K |
+| `meta-llama/llama-3.3-70b-instruct:free` | Everything, most reliable | 128K |
+| `nvidia/nemotron-3-super-120b-a12b:free` | Long codebases, big context | 1M |
+| `deepseek/deepseek-r1:free` | Reasoning-heavy tasks | 64K |
+| `google/gemma-3-27b-it:free` | Lightweight, fast | 128K |
+| `mistralai/mistral-small-3.1-24b-instruct:free` | Quick tasks | 128K |
 
-> **Tip:** Check the current full list at [openrouter.ai/collections/free-models](https://openrouter.ai/collections/free-models)
-
-**Recommended starting model:** `meta-llama/llama-3.3-70b-instruct:free` — it has the best track record for following Claude Code's tool-use format.
+Full current list at [openrouter.ai/collections/free-models](https://openrouter.ai/collections/free-models) — it changes as providers add and remove models.
 
 ---
 
-## Switching Models
+## Switching models
 
-When a model hits rate limits or goes offline, just edit your config:
+When a model gets throttled or disappears, just edit the config:
 
 ```bash
 nano ~/.claude/settings.json
 ```
 
-Change the `ANTHROPIC_MODEL` value to any model from the list above, then:
+Change `ANTHROPIC_MODEL` to a different model ID, then `exec bash && claude`.
 
-```bash
-exec bash
-claude
-```
+I keep 2-3 model IDs in a notes file so I can swap quickly without having to look them up.
 
 ---
 
-## Understanding Free Tier Limits
+## How the free limits work
 
-Free models on OpenRouter have two types of limits:
+There are two kinds of limits and they're easy to confuse:
 
-| Limit type | What it means | Reset time |
-|---|---|---|
-| Rate limit | Max requests per minute (~20 req/min) | Minutes |
-| Daily token budget | Max tokens per day per model | Every 24 hours |
-| Sponsored budget | Total tokens provider allocates | Topped up periodically |
+**Rate limits** — how many requests per minute. Hit this and you get the `Retrying in 35s` message. Usually clears in a few minutes.
 
-**What this means in practice:**
-- Light daily coding tasks (bug fixes, small features): works great
-- Large codebase analysis or long sessions: you may hit limits faster
-- If one model is exhausted, switch to another — limits are per model
+**Daily token budget** — each model has a daily allocation. Burn through it and you need to either wait for reset (24 hours) or switch to a different model. Limits are per model, so switching buys you a fresh budget.
+
+For normal daily work — fixing bugs, writing features, reviewing code — you probably won't hit the daily limit. Where it bites you is long sessions on large codebases where Claude reads hundreds of files.
 
 ---
 
-## Tips to Stretch Your Free Tokens
+## Making your tokens last longer
 
-1. **Start sessions fresh** — run `/clear` in Claude Code to reset conversation context before a new task
+The biggest token drain in Claude Code is context — every file it reads, every message in the session, all of it adds up.
 
-2. **Be specific with prompts** — instead of:
-   > "fix my authentication system"
-   
-   say:
-   > "fix the JWT validation bug in `src/auth/middleware.js` line 45"
+**Run `/clear` between tasks.** Starting a new task in the same session carries all the old context. `/clear` resets it.
 
-3. **Use `/compact`** — this compresses the conversation history in Claude Code, saving tokens while keeping context
+**Be specific.** "Fix my auth system" causes Claude to explore your whole codebase. "Fix the JWT validation bug in `src/auth/middleware.js` around line 45" goes straight to the problem.
 
-4. **Work on small scopes** — point Claude at specific files, not your entire repo
+**Use `/compact`.** This compresses conversation history without losing context. Run it when a session gets long.
 
-5. **Avoid running Claude from your home directory** — launch it from inside your project folder so it doesn't scan unrelated files
-
-6. **Rotate models** — keep 2–3 model IDs handy so you can swap when one hits its daily limit
+**Launch from your project folder.** Running `claude` from your home directory means it might scan everything. `cd` into your project first.
 
 ---
 
@@ -204,60 +151,50 @@ Free models on OpenRouter have two types of limits:
 
 ### `API returned an empty or malformed response (HTTP 200)`
 
-**Cause:** Wrong base URL — you likely have `/v1` appended.
-
-**Fix:** Make sure your `ANTHROPIC_BASE_URL` is exactly:
-```
-https://openrouter.ai/api
-```
-Not `https://openrouter.ai/api/v1`.
+You have `/v1` at the end of your base URL. Change it to `https://openrouter.ai/api` with nothing after it.
 
 ---
 
-### `400 — is not a valid model ID`
+### `400 — not a valid model ID`
 
-**Cause:** The model ID is wrong or the model was renamed/removed.
+Two things to check:
 
-**Fix:**
-1. Check the exact current model IDs at [openrouter.ai/collections/free-models](https://openrouter.ai/collections/free-models)
-2. Also check if Claude Code is prepending `openrouter/` to your model name (a known bug). If so, use only `ANTHROPIC_MODEL` in the `env` block and remove the top-level `"model"` key from your settings.
+1. The model ID might be wrong or the model was renamed. Verify at [openrouter.ai/collections/free-models](https://openrouter.ai/collections/free-models).
+
+2. Claude Code has a bug where it prepends `openrouter/` to your model name, turning `meta-llama/...` into `openrouter/meta-llama/...`. If you see that prefix in error messages, make sure you're setting the model via `ANTHROPIC_MODEL` in the `env` block only — remove any top-level `"model"` key from settings.
 
 ---
 
 ### `Retrying in 35s · attempt X/10`
 
-**Cause:** Rate limit hit on the free tier.
-
-**Fix:**
-- Wait a few minutes and try again
-- Switch to a different free model
-- Use `/clear` to shorten your context before retrying
+Rate limited. Options:
+- Wait a few minutes
+- Switch to a different model
+- Run `/clear` to reduce your context size before retrying
 
 ---
 
-### `There's an issue with the selected model — it may not exist or you may not have access`
+### `There's an issue with the selected model`
 
-**Cause:** The model has been taken offline or your account doesn't have access.
-
-**Fix:** Switch to a different model from the [free models list](#free-models-you-can-use). `meta-llama/llama-3.3-70b-instruct:free` is the most consistently available.
+The model is offline or unavailable. Switch to `meta-llama/llama-3.3-70b-instruct:free` — it's the most consistently available one.
 
 ---
 
-### Claude Code shows the wrong model name in the UI
+### Wrong model showing in the UI
 
-**Cause:** A project-level settings file is overriding your global config.
+A project-level config is overriding your global one. Find it:
 
-**Fix:** Check for project-level configs:
 ```bash
 find ~ -name "settings.json" -path "*/.claude/*" 2>/dev/null
 ```
-Remove or update any project-level files that have a conflicting `model` value.
+
+Update or delete the conflicting file.
 
 ---
 
-### Still not working after all fixes?
+### Nothing is working
 
-Run this diagnostic to see exactly what config Claude Code is reading:
+Run this to confirm what config Claude Code is actually reading:
 
 ```bash
 cat ~/.claude/settings.json
@@ -265,36 +202,38 @@ exec bash
 claude --version
 ```
 
-If issues persist, check OpenRouter's status at [openrouter.ai](https://openrouter.ai) — free model availability can change.
+Also check [openrouter.ai](https://openrouter.ai) directly — sometimes models go down on their end.
 
 ---
 
-## FAQ
+## Questions people ask
 
-**Q: Is this against Anthropic's terms of service?**  
-A: Claude Code supports custom base URLs by design — this is an officially supported configuration. You are simply routing requests through OpenRouter instead of Anthropic's API.
+**Is this against Anthropic's ToS?**
+No. Custom base URL support is built into Claude Code by Anthropic. You're using it as intended, just with a different backend.
 
-**Q: Do free models reset daily?**  
-A: Most free model limits reset every 24 hours. Some providers top up their sponsored token budgets periodically. If a model runs dry, switch to another.
+**Do limits reset daily?**
+Most do, every 24 hours. Some providers top up budgets less frequently. If a model seems permanently broken, it might have been retired — check the free models list and try another.
 
-**Q: Can I use this for production work?**  
-A: Free tier models are fine for personal projects and development. For production or team use, consider adding OpenRouter credits ($5–10 goes a long way) for higher limits and guaranteed availability.
+**Can I use this for real projects?**
+Yes, within reason. Works well for personal projects and day-to-day development. For a production team that needs consistent availability, putting some credits on OpenRouter — even $5-10 — makes a big difference in rate limits.
 
-**Q: Why not just use `openrouter/auto`?**  
-A: `openrouter/auto` rotates between available free models automatically, but you lose control over which model is used. For consistent behavior, specifying a model is better.
+**Why not use `openrouter/auto`?**
+It rotates between free models automatically which sounds convenient, but you lose predictability. Model behavior varies enough that it's worth picking one you trust.
 
-**Q: The model is slow — is that normal?**  
-A: Free tier models are shared resources and can be slower during peak hours. Try a different model or work during off-peak times.
+**It's slow. Is something wrong?**
+Free models are shared infrastructure. Peak hours mean slower responses. Try a different model or come back later.
 
-**Q: How do I update Claude Code?**  
-A: Run `npm update -g @anthropic-ai/claude-code` to get the latest version.
-
----
-
-## Contributing
-
-Found a broken model ID or a new free model that works well? Open a PR or issue — keeping this list current helps everyone.
+**How do I update Claude Code?**
+```bash
+npm update -g @anthropic-ai/claude-code
+```
 
 ---
 
-*Last updated: May 2026*
+## Found something broken?
+
+Model IDs change, new free models appear, old ones disappear. If something in this guide is outdated, open a PR or issue. Keeping it accurate helps everyone.
+
+---
+
+*Last updated May 2026*
