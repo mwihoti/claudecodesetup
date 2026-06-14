@@ -98,12 +98,23 @@ Start with Llama 3.3 — it follows Claude Code's tool-use format the most relia
 | Model ID | Good for | Context |
 |---|---|---|
 | `meta-llama/llama-3.3-70b-instruct:free` | Everything, most reliable | 128K |
-| `nvidia/nemotron-3-super-120b-a12b:free` | Long codebases, big context | 1M |
-| `deepseek/deepseek-r1:free` | Reasoning-heavy tasks | 64K |
-| `google/gemma-3-27b-it:free` | Lightweight, fast | 128K |
-| `mistralai/mistral-small-3.1-24b-instruct:free` | Quick tasks | 128K |
+| `qwen/qwen3-coder:free` | Agentic coding, repo-scale edits | 1.05M |
+| `qwen/qwen3-next-80b-a3b-instruct:free` | Long-context coding and RAG | 262K |
+| `nvidia/nemotron-nano-9b-v2:free` | Fast reasoning/chat, simple coding | 128K |
+| `nousresearch/hermes-3-llama-3.1-405b:free` | General assistant work, structured output | 128K |
+| `liquid/lfm-2.5-1.2b-thinking:free` | Lightweight reasoning and extraction | 32K |
+| `liquid/lfm-2.5-1.2b-instruct:free` | Fast lightweight chat | 32K |
+| `openrouter/free` | Auto-picks a free model that supports your request | 200K |
 
 Full current list at [openrouter.ai/collections/free-models](https://openrouter.ai/collections/free-models) — it changes as providers add and remove models.
+
+There are also free non-chat utility models on OpenRouter:
+
+| Model ID | Use case | Context |
+|---|---|---|
+| `nvidia/llama-nemotron-embed-vl-1b-v2:free` | Multimodal embeddings for text/images/documents | 131K |
+| `nvidia/llama-nemotron-rerank-vl-1b-v2:free` | Multimodal reranking for RAG | 10K |
+| `nvidia/nemotron-3.5-content-safety:free` | Prompt and response moderation | 128K |
 
 ---
 
@@ -123,13 +134,24 @@ I keep 2-3 model IDs in a notes file so I can swap quickly without having to loo
 
 ## How the free limits work
 
-There are two kinds of limits and they're easy to confuse:
+OpenRouter's `:free` models use a request cap, not unlimited free usage:
 
-**Rate limits** — how many requests per minute. Hit this and you get the `Retrying in 35s` message. Usually clears in a few minutes.
+- 50 requests per day if your account has bought less than $10 in credits
+- 1000 requests per day after your account has bought at least $10 in credits
+- 20 requests per minute for free model variants
 
-**Daily token budget** — each model has a daily allocation. Burn through it and you need to either wait for reset (24 hours) or switch to a different model. Limits are per model, so switching buys you a fresh budget.
+Hit the per-minute limit and Claude Code usually shows `Retrying in 35s`. Wait a few minutes or switch models.
 
-For normal daily work — fixing bugs, writing features, reviewing code — you probably won't hit the daily limit. Where it bites you is long sessions on large codebases where Claude reads hundreds of files.
+For normal daily work — fixing bugs, writing features, reviewing code — 50 prompts can go faster than you expect because agentic coding burns requests on tool loops. Long sessions on large codebases are where it bites hardest.
+
+You can check your current key limits with OpenRouter's key endpoint:
+
+```bash
+curl https://openrouter.ai/api/v1/key \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY"
+```
+
+Free endpoints are for trial use. OpenRouter says prompts and outputs on free endpoints are logged to improve the provider's model and product, so don't send secrets, private code, customer data, or anything business-critical through them.
 
 ---
 
@@ -236,4 +258,4 @@ Model IDs change, new free models appear, old ones disappear. If something in th
 
 ---
 
-*Last updated May 2026*
+*Last updated June 2026*
