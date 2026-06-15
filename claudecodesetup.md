@@ -155,6 +155,41 @@ Free endpoints are for trial use. OpenRouter says prompts and outputs on free en
 
 ---
 
+## What about Ollama Cloud?
+
+Ollama Cloud is useful if you want bigger Ollama models without running them on your own GPU. It works like a remote Ollama host: your existing Ollama tools can call cloud models through Ollama's API.
+
+Sign in first:
+
+```bash
+ollama signin
+```
+
+Then run a cloud model from the CLI:
+
+```bash
+ollama run gpt-oss:120b-cloud
+```
+
+For direct API access, create an Ollama API key and set it:
+
+```bash
+export OLLAMA_API_KEY=your_api_key
+```
+
+List available remote models:
+
+```bash
+curl https://ollama.com/api/tags \
+  -H "Authorization: Bearer $OLLAMA_API_KEY"
+```
+
+Important Claude Code caveat: don't just replace `ANTHROPIC_BASE_URL` with `https://ollama.com/api`. Ollama Cloud exposes Ollama's API shape, while Claude Code expects Anthropic's API shape. To use Ollama Cloud behind Claude Code, you need an Anthropic-compatible proxy that translates Claude Code requests to Ollama requests.
+
+For most people, OpenRouter is still the cleaner Claude Code setup. Ollama Cloud makes more sense if you are already using Ollama-native tools, or if you are willing to run a proxy layer.
+
+---
+
 ## Making your tokens last longer
 
 The biggest token drain in Claude Code is context — every file it reads, every message in the session, all of it adds up.
